@@ -7,6 +7,6 @@
 #               First number score of first team
 #               Second number score of second team
 A,B	C,D	2,1
-A,B	C,D	2,0
-A,B	C,D	2,0
-A,B	C,D	2,1
+E,F	G,H	2,0
+E,B	C,A	0,2
+A,B	C,E	2,1

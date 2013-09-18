@@ -27,10 +27,19 @@ def os_load_tsv(DIR, filename):
             N1 = int(row[2].split(",")[0])  # team1 wins
             N2 = int(row[2].split(",")[1])  # team2 wins
             # The first team in the list is the winner
-            for i in range(N1):
-                data.append([team1, team2])
-            for j in range(N2):
-                data.append([team2, team1])
+            # Find drawn games:
+            for i in range(min(N1,N2)):
+                data.append([team1, team2, [0,0]])
+            for i in range(abs(N2-N1)):
+                if N1 > N2:
+                    ranks = [0,1]
+                else:
+                    ranks = [1,0]
+                data.append([team1, team2, ranks])
+            #for i in range(N1):
+            #    data.append([team1, team2], [)
+            ##for j in range(N2):
+            #    data.append([team2, team1])
     return data
 
 def math_eval_data(data):
@@ -42,34 +51,34 @@ def math_eval_data(data):
     for game in data:
         team1 = game[0]
         for player in team1:
-            players[player] = trueskill.Rating(50,25)
+            players[player] = trueskill.Rating(0,25)
         team2 = game[1]
         for player in team2:
-            players[player] = trueskill.Rating(50,25)     
+            players[player] = trueskill.Rating(0,25)     
     # Compute true skill for each player
     for game in data:
         team1 = game[0]
         Rgroup1 = list()
         for player in team1:
             Rgroup1.append(players[player])
-        team1 = game[0]
+        team2 = game[1]
         Rgroup2 = list()
         for player in team2:
             Rgroup2.append(players[player])
         # Rate the groups
         # team1 won
-        wing, loseg = trueskill.rate([Rgroup1, Rgroup2], ranks=[0,1])
+        wing, loseg = trueskill.rate([Rgroup1, Rgroup2], ranks=game[2])
         # Write back te rank to the players dictionary
         for i in range(len(team1)):
             player = team1[i]
-            players[player] = wing[i] 
+            players[player] = wing[i]
         for i in range(len(team2)):
             player = team2[i]
             players[player] = loseg[i]
     return players
 
 DIR="./"
-filename="examplestat.tsv"
+filename="examplestat.csv"
 
 data = os_load_tsv(DIR, filename)
 
