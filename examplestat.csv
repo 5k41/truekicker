@@ -1,0 +1,12 @@
+# Lines starting with a hash are ignored "#"
+# Tab "\t" separated vaulues.
+#   1st column: First team (no. of players does not matter)
+#               Player initials separated by comma.
+#   2nd column: Second team
+#   3rd column: Score, separated by comma,
+#               First number score of first team
+#               Second number score of second team
+A,B	C,D	2,1
+A,B	C,D	2,0
+A,B	C,D	2,0
+A,B	C,D	2,1
