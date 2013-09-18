@@ -9,6 +9,7 @@ import os
 import trueskill
 import IPython
 
+
 def os_load_tsv(DIR, filename):
     """
         Load kicker data from tsv file (see examplestat.tsv).
@@ -41,6 +42,7 @@ def os_load_tsv(DIR, filename):
             ##for j in range(N2):
             #    data.append([team2, team1])
     return data
+
 
 def math_eval_data(data):
     """
@@ -76,6 +78,41 @@ def math_eval_data(data):
             player = team2[i]
             players[player] = loseg[i]
     return players
+
+
+def math_get_timeline(data):
+    """
+        Get the player history for all players.
+        Input: Data from os_load_tsv
+        Returns: Time line (list) containing dictionaries of player stats.
+                 e.g.: starting point of time line and mu/sigma of player A:
+                 timeline[0]["A"].mu
+                 timeline[0]["A"].sigma
+    """
+    timeline = list()
+    newdata = list()
+    for item in data:
+        newdata += item
+        players = math_eval_data(newdata)
+        timeline.append(players)
+    return timeline
+    
+
+def math_create_plot_data(timeline):
+    """
+        From a timeline (see math_get_timeline), get the plotting data for
+        all players.
+        Returns: - list of [arr(mu), arr(i)], [arr(sigma), arr(i)] for plotting
+                   with matplotlib where i goes from 1 to total number of games
+                   played.
+                 - labels (player names)
+    """
+    labels = players.keys()
+    labels.sort()
+    
+    
+    return plotdata, labels
+            
 
 DIR="./"
 filename="examplestat.csv"
