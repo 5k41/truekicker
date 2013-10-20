@@ -149,5 +149,5 @@ plt.ylabel('Skill',size='x-large')
 plt.xlabel('Game',size='x-large')
 plt.legend(labels, loc=3, fancybox=True)
 plt.grid(linestyle='--', linewidth=1, color="gray")
-plt.savefig('KicckerScore.png')
+plt.savefig('KickerScore.png')
 
