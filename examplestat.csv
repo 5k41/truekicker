@@ -6,7 +6,7 @@
 #   3rd column: Score, separated by comma,
 #               First number score of first team
 #               Second number score of second team
-A,B	C,D	2,1
+A,C	B,D	2,1
 A,B	C,D	2,0
 A,B	C,D	1,2
 A,B	C,D	2,1
