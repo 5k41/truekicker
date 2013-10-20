@@ -5,6 +5,9 @@
 """
 
 import csv
+from matplotlib import cm
+import matplotlib.pyplot as plt
+import numpy as np
 import os
 import trueskill
 import IPython
@@ -22,6 +25,7 @@ def os_load_tsv(DIR, filename):
             # Do nothing with empty/whitespace lines
             pass
         elif str(row[0])[0:1] != '#':
+
             # A,B C,D 2,1
             team1 = row[0].split(",")
             team2 = row[1].split(",")
@@ -92,7 +96,7 @@ def math_get_timeline(data):
     timeline = list()
     newdata = list()
     for item in data:
-        newdata += item
+        newdata += [item]
         players = math_eval_data(newdata)
         timeline.append(players)
     return timeline
@@ -102,23 +106,48 @@ def math_create_plot_data(timeline):
     """
         From a timeline (see math_get_timeline), get the plotting data for
         all players.
-        Returns: - list of [arr(mu), arr(i)], [arr(sigma), arr(i)] for plotting
+        Returns: - list of [arr(i), arr(mu), arr(sigma)] for plotting
                    with matplotlib where i goes from 1 to total number of games
                    played.
                  - labels (player names)
     """
-    labels = players.keys()
+    labels = timeline[-1].keys()
     labels.sort()
-    
-    
+    plotdata = list()
+    for label in labels:
+        mu = list()
+        sigma = list()
+        for i in xrange(len(timeline)):
+            mu.append(timeline[i][label].mu)
+            sigma.append(timeline[i][label].sigma)
+        plotdata.append([np.arange(len(timeline))/2., np.array(mu), np.array(sigma)])
     return plotdata, labels
             
 
+
+# Define directory and files
 DIR="./"
 filename="examplestat.csv"
-
+# import data
 data = os_load_tsv(DIR, filename)
+# create timeline
+timeline = math_get_timeline(data)
+# get plotting information (Game,Skill,Skill_err)
+plotdata, labels = math_create_plot_data(timeline)
 
-players = math_eval_data(data)
+# Plot data
+splt = plt.subplot(111)
+cmap = cm.get_cmap("hsv")
+for k in xrange(len(labels)):
+    color = cmap(1.*k/(len(labels)))
+    plt.errorbar(plotdata[k][0], plotdata[k][1], yerr=plotdata[k][2], color=color)
 
-IPython.embed()
+splt.yaxis.set_label_position("right")
+splt.yaxis.set_ticks_position("right")
+plt.xticks(np.arange(len(timeline)/2)+.5, np.arange(len(timeline)/2)+1)
+plt.ylabel('Skill',size='x-large')
+plt.xlabel('Game',size='x-large')
+plt.legend(labels, loc=3, fancybox=True)
+plt.grid(linestyle='--', linewidth=1, color="gray")
+plt.savefig('KicckerScore.png')
+
