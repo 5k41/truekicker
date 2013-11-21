@@ -25,10 +25,14 @@ def os_load_tsv(DIR, filename):
             # Do nothing with empty/whitespace lines
             pass
         elif str(row[0])[0:1] != '#':
-
             # A,B C,D 2,1
             team1 = row[0].split(",")
             team2 = row[1].split(",")
+            # remove spaces:
+            for i in range(len(team1)):
+                team1[i] = team1[i].strip()
+            for i in range(len(team2)):
+                team2[i] = team2[i].strip()
             N1 = int(row[2].split(",")[0])  # team1 wins
             N2 = int(row[2].split(",")[1])  # team2 wins
             # The first team in the list is the winner
@@ -113,13 +117,23 @@ def math_create_plot_data(timeline):
     """
     labels = timeline[-1].keys()
     labels.sort()
+
+    # TODO:
+    # sort labels according to timeline[-1][label].mu
+
     plotdata = list()
-    for label in labels:
+    for l in range(len(labels)):
+        label = labels[l]
+        labels[l] = "{} {:2.0f}".format(label, timeline[-1][label].mu)
         mu = list()
         sigma = list()
         for i in xrange(len(timeline)):
-            mu.append(timeline[i][label].mu)
-            sigma.append(timeline[i][label].sigma)
+            if label in timeline[i].keys():
+                mu.append(timeline[i][label].mu)
+                sigma.append(timeline[i][label].sigma)
+            else:
+                mu.append(0)
+                sigma.append(0)
         plotdata.append([np.arange(len(timeline))/2., np.array(mu), np.array(sigma)])
     return plotdata, labels
             
@@ -127,7 +141,7 @@ def math_create_plot_data(timeline):
 
 # Define directory and files
 DIR="./"
-filename="examplestat.csv"
+filename="kicker1.txt"
 # import data
 data = os_load_tsv(DIR, filename)
 # create timeline
