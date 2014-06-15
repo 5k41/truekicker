@@ -31,11 +31,12 @@ def create_plot_data(timeline, length=None):
                    played.
                  - labels (player names)
     """
+    plotlabels = list()
     labels = timeline[-1].keys()
     labels.sort()
     plotdata = list()
     # add zero at beginning
-   
+
     start = 0
     stop = len(timeline)
     if length is not None:
@@ -46,14 +47,20 @@ def create_plot_data(timeline, length=None):
         sigma = list()
 
         for i in range(stop):
-            mu.append(timeline[i][label].mu)
-            sigma.append(timeline[i][label].sigma)
+            try:
+                mu.append(timeline[i][label].mu)
+                sigma.append(timeline[i][label].sigma)
+            except KeyError:
+                mu.append(0)
+                sigma.append(0)
         
         plotdata.append([np.arange(stop-start)+start+1,
                          np.array(mu)[start:stop],
                          np.array(sigma)[start:stop]])
+                         
+        plotlabels.append(u"{}   {:.1f}".format(label,mu[stop-1]))
     
-    return plotdata, labels
+    return plotdata, plotlabels
 
 
 def eval_data(data):
@@ -148,6 +155,8 @@ def load_tsv(filename):
             # A,B C,D 2,1
             team1 = row[0].split(",")
             team2 = row[1].split(",")
+            team1 = [pl.strip() for pl in team1]
+            team2 = [pl.strip() for pl in team2]
             N1 = int(row[2].split(",")[0])  # team1 wins
             N2 = int(row[2].split(",")[1])  # team2 wins
             # The first team in the list is the winner
@@ -216,7 +225,7 @@ for p in plots:
     splt.set_position([box.x0 + box.width * 0.10, box.y0,
                      box.width* 0.90, box.height])
     plt.legend(loc='upper center', 
-               bbox_to_anchor=(-0.18, 1.05),
+               bbox_to_anchor=(-0.18, 1.01),
                prop={'size':9})
     plt.grid(linestyle='--', linewidth=1, color="gray")
     #plt.tight_layout()
