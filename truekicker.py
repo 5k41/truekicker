@@ -9,6 +9,7 @@ to their names and are consecutively processed. If a player has been
 played before, he will inherit its score from previous .tsc files.
 
 """
+
 from __future__ import division
 
 import csv
@@ -34,8 +35,7 @@ def create_plot_data(timeline, length=None):
     labels.sort()
     plotdata = list()
     # add zero at beginning
-    IPython.embed()
-    
+   
     start = 0
     stop = len(timeline)
     if length is not None:
@@ -168,8 +168,6 @@ def load_tsv(filename):
 
 
 
-
-
 # Define directory and files
 #DIR="./"
 #filename="examplestat.tsv"
@@ -197,8 +195,8 @@ for i in range(len(timelines)):
 
 for p in plots:
     # Plot data
-    plt.figure()
-    
+    fig=plt.figure()
+
     plotdata, labels = p[1]
     splt = plt.subplot(111)
     cmap = cm.get_cmap("hsv")
@@ -206,14 +204,21 @@ for p in plots:
     for k in xrange(len(labels)):
         color = cmap(1.*k/(len(labels)))
         #plt.errorbar(plotdata[k][0], plotdata[k][1], yerr=plotdata[k][2], color=color)
-        plt.plot(plotdata[k][0], plotdata[k][1], color=color)
+        plt.plot(plotdata[k][0], plotdata[k][1], color=color, label=labels[k])
 
     splt.yaxis.set_label_position("right")
     splt.yaxis.set_ticks_position("right")
     #plt.xticks(np.arange(len(timeline)/2)+.5, np.arange(len(timeline)/2)+1)
     plt.ylabel('Skill',size='x-large')
     plt.xlabel('Game',size='x-large')
-    plt.legend(labels, loc=3, fancybox=True)
+    #plt.legend(labels, loc=3, fancybox=True)
+    box = splt.get_position()
+    splt.set_position([box.x0 + box.width * 0.10, box.y0,
+                     box.width* 0.90, box.height])
+    plt.legend(loc='upper center', 
+               bbox_to_anchor=(-0.18, 1.05),
+               prop={'size':9})
     plt.grid(linestyle='--', linewidth=1, color="gray")
+    #plt.tight_layout()
     plt.savefig('{}_KickerScore.png'.format(p[0]))
 
