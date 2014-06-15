@@ -210,10 +210,17 @@ for p in plots:
     splt = plt.subplot(111)
     cmap = cm.get_cmap("hsv")
 
+    # Get thickness of lines
+    thickness = np.zeros(len(labels))
+    for k in xrange(len(labels)):
+        thickness[k] = len(np.unique(plotdata[k][1]))
+    thickness *= 4/thickness.max()
+
     for k in xrange(len(labels)):
         color = cmap(1.*k/(len(labels)))
         #plt.errorbar(plotdata[k][0], plotdata[k][1], yerr=plotdata[k][2], color=color)
-        plt.plot(plotdata[k][0], plotdata[k][1], color=color, label=labels[k])
+        plt.plot(plotdata[k][0], plotdata[k][1], color=color,
+                 label=labels[k], linewidth=thickness[k])
 
     splt.yaxis.set_label_position("right")
     splt.yaxis.set_ticks_position("right")
@@ -229,6 +236,7 @@ for p in plots:
                prop={'size':9})
     plt.grid(linestyle='--', linewidth=1, color="gray")
     #plt.tight_layout()
+    splt.set_xlim((plotdata[k][0].min(), plotdata[k][0].max()))
     plt.savefig('{}_KickerScore.png'.format(p[0]))
 
 
