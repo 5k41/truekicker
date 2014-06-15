@@ -15,7 +15,7 @@ Install trueskill:
 
     easy_install trueskill
     
-Save kicker scores in .csv data files (see **examplestat.csv** in this repo).  
+Save kicker scores in .tsv data files (see **examplestat*.tsv** in this repo).  
 Running
 
     python truekicker.py
