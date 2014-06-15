@@ -222,3 +222,4 @@ for p in plots:
     #plt.tight_layout()
     plt.savefig('{}_KickerScore.png'.format(p[0]))
 
+
