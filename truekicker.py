@@ -96,7 +96,49 @@ def eval_data(data):
         for i in range(len(team2)):
             player = team2[i]
             players[player] = loseg[i]
+
     return players
+
+
+def eval_step(players, data):
+    """
+        Using TrueSkill, compute every players current skill and std.
+    """
+    # Iterate through data and make a dictionary of Players
+    #players = dict()
+    for game in data:
+        team1 = game[0]
+        for player in team1:
+            if player not in list(players.keys()):
+                players[player] = trueskill.Rating(0,25)
+        team2 = game[1]
+        for player in team2:
+            if player not in list(players.keys()):
+                players[player] = trueskill.Rating(0,25)     
+    # Compute true skill for each player
+    for game in data:
+        team1 = game[0]
+        Rgroup1 = list()
+        for player in team1:
+            Rgroup1.append(players[player])
+        team2 = game[1]
+        Rgroup2 = list()
+        for player in team2:
+            Rgroup2.append(players[player])
+        # Rate the groups
+        # team1 won
+        wing, loseg = trueskill.rate([Rgroup1, Rgroup2], ranks=game[2])
+        # Write back te rank to the players dictionary
+        for i in range(len(team1)):
+            player = team1[i]
+            players[player] = wing[i]
+        for i in range(len(team2)):
+            player = team2[i]
+            players[player] = loseg[i]
+
+    return players
+
+
 
 
 def get_timeline(data):
@@ -110,10 +152,23 @@ def get_timeline(data):
     """
     timeline = list()
     newdata = list()
+    players = dict()
     for item in data:
-        newdata += [item]
-        players = eval_data(newdata)
-        timeline.append(players)
+        newdata = [item]
+        #players = eval_data(newdata)
+        
+        players = eval_step(players,newdata)
+        timeline.append(players.copy())
+        #import IPython
+        #IPython.embed()
+        ##
+        ## here we need to check if we want to penalize
+        timeline = penalize_timeline(timeline)
+        players = timeline[-1].copy()
+        #import IPython
+        #IPython.embed()
+        #print(item)
+        
     return timeline
 
 
@@ -176,7 +231,70 @@ def load_tsv(filename):
     return data
 
 
+def join_timelines(timelines):
+    """ Returns one timeline from a list of timelines """
+    timeline = list()
+    for i in range(len(timelines)):
+        timeline += timelines[i][1]
+    return ["Full Timeline", timeline]
 
+
+
+def separate_timeline(timeline, oldtimelines):
+    """ Returns one timeline from a list of timelines """
+    timelines = list()
+    count = 0
+    for i in range(len(oldtimelines)):
+        add = len(oldtimelines[i][1])
+        timelines += [[oldtimelines[i][0], timeline[1][count:count+add]]]
+        count += add
+    return timelines
+
+
+def penalize_timeline(timeline, missed_games=10, penalty=.10):
+    """ If a player hasn't played `missed_gamse`, then he will
+        get a `penalty` towards zero that will be distributed between
+        all other players that did play during that period.
+        
+        This introduces inflation.
+    """
+    games = timeline
+    N = len(games)
+    for i in range(missed_games+1, N):
+        # each element from time line contains a dictionary whose
+        # keys are the players and whose values are TS ratings.
+        # r = trueskill.rating(mu=mu, sigma=sigma)
+        
+        # find players who haven't played:
+        allplayers = games[i].keys()
+        players = list()
+        for p in list(allplayers):
+            for j in range(1,missed_games):
+                try:
+                    if (games[i-j][p].mu - games[i][p].mu != 0):
+                        players.append(p)
+                except KeyError:
+                    # player did not exist -> add as player.
+                    players.append(p)
+        
+        a=np.array(allplayers)
+        b=np.array(players)
+        haters = list(np.lib.arraysetops.setdiff1d(a,b))
+        for h in haters:
+            sk = games[i][h]
+            mudiff = sk.mu*(penalty)
+            games[i][h] = trueskill.Rating(mu=sk.mu-mudiff,
+                                           sigma=sk.sigma)
+            lp = len(players)
+            for p in players:
+                psk = games[i][p]
+                # Using abs here introduces inflation!
+                games[i][p] = trueskill.Rating(mu=psk.mu+abs(mudiff/lp),
+                                               sigma=psk.sigma)
+    return games
+            
+        
+            
 # Define directory and files
 #DIR="./"
 #filename="examplestat.tsv"
@@ -191,9 +309,18 @@ DIR = os.path.dirname(os.path.realpath(__file__))
 
 timelines = import_folder(DIR)
 
+## Add penalty
+#timeline = join_timelines(timelines)
+#timelinepen = penalize_timeline(timeline)
+#timelines2 = separate_timeline(timeline, timelines)
+
+#import IPython
+#IPython.embed()
+
 plots = list()
 
 for i in range(len(timelines)):
+    print(i)
     if i == 0:
         length = None
     else:
